@@ -91,12 +91,12 @@ export default {
         password: "111111",
       },
       loginRules: {
-        username: [
-          { required: true, trigger: "blur", validator: validateUsername },
-        ],
-        password: [
-          { required: true, trigger: "blur", validator: validatePassword },
-        ],
+        // username: [
+        //   { required: true, trigger: "blur", validator: validateUsername },
+        // ],
+        // password: [
+        //   { required: true, trigger: "blur", validator: validatePassword },
+        // ],
       },
       loading: false,
       passwordType: "password",
@@ -142,7 +142,7 @@ export default {
               this.loading = false;
             });
         } else {
-          console.log("error submit!!");
+          console.log("提交错误!!");
           return false;
         }
       });

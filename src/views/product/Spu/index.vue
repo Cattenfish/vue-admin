@@ -2,7 +2,7 @@
   <div>
     <el-card style="margin: 20px 0px">
       <!-- 三级联动全局组件 -->
-      <CategorySelect @getCategoryId="getCategoryId" :show="!isShowTable">
+      <CategorySelect @getCategoryId="getCategoryId" :show="scene != 0">
       </CategorySelect></el-card
     ><el-card>
       <div v-show="scene == 0">
@@ -38,7 +38,8 @@
                 type="success"
                 icon="el-icon-plus"
                 sizi="mini"
-                title="添加spu"
+                title="添加sku"
+                @click="addSku(row)"
               ></HintButton>
               <HintButton
                 type="warning"
@@ -52,13 +53,20 @@
                 icon="el-icon-info"
                 sizi="mini"
                 title="查看当前spu全部sku列表"
+                @click="handler(row)"
               ></HintButton>
-              <el-button
-                type="danger"
-                icon="el-icon-delete"
-                sizi="mini"
-                title="删除spu"
-              ></el-button> </template
+              <el-popconfirm
+                :title="`确定删除${row.spuName}吗？`"
+                @onConfirm="deleteSpu(row)"
+              >
+                <HintButton
+                  type="danger"
+                  icon="el-icon-delete"
+                  sizi="mini"
+                  title="删除spu"
+                  slot="reference"
+                ></HintButton>
+              </el-popconfirm> </template
           ></el-table-column>
         </el-table>
 
@@ -74,13 +82,37 @@
         >
         </el-pagination>
       </div>
+
       <SpuForm
         v-show="scene == 1"
         @changeScene="changeScene"
         ref="spu"
       ></SpuForm>
-      <SpuForm v-show="scene == 2"></SpuForm>
+      <SkuForm
+        v-show="scene == 2"
+        ref="sku"
+        @changeScene1="changeScene1"
+      ></SkuForm>
     </el-card>
+    <el-dialog
+      :title="`${spu.spuName}的SKU列表`"
+      :visible.sync="dialogTableVisible"
+      :before-close="close"
+    >
+      <el-table :data="skuList" style="width: 100%" border v-loading="loading">
+        <el-table-column prop="skuName" label="名称"></el-table-column>
+        <el-table-column prop="price" label="价格"></el-table-column>
+        <el-table-column prop="weight" label="重量"></el-table-column>
+        <el-table-column label="默认图片">
+          <template slot-scope="{ row, $index }">
+            <img
+              :src="row.skuDefaultImg"
+              alt=""
+              style="width: 100px; height: 100px"
+            />
+          </template> </el-table-column
+      ></el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -88,6 +120,7 @@
 //引入子组件
 import SpuForm from "./SpuForm";
 import SkuForm from "./SkuForm";
+
 export default {
   name: "Spu",
   data() {
@@ -95,12 +128,15 @@ export default {
       category1Id: "",
       category2Id: "",
       category3Id: "",
-      isShowTable: true,
       page: 1, //当前第几页
       limit: 3, //每页展示条数
       records: [], //spu列表的数据
       total: 0, //分页器一个需要展示的数据条数
       scene: 0,
+      dialogTableVisible: false, //控制对话框的显示隐藏
+      spu: {},
+      skuList: [], //sku列表的数组
+      loading: true, //loading效果表格
     };
   },
   components: {
@@ -140,6 +176,8 @@ export default {
     },
     addSpu() {
       this.scene = 1;
+      //通知子组件SpuForm发请求--两个
+      this.$refs.spu.addSpuData(this.category3Id);
     },
     updateSpu(row) {
       this.scene = 1;
@@ -147,8 +185,65 @@ export default {
       this.$refs.spu.initSpuData(row);
     },
     //自定义事件回调(SpuForm)
-    changeScene(scene) {
+    changeScene({ scene, flag }) {
+      //flag这个按钮是为了区分保存按钮是添加还是修改
       this.scene = scene;
+      //子组件通知父组件切换场景，需要再次获取spu列表的数据进行展示
+      if (flag == "修改") {
+        //停留在当前页
+        this.getSpuList(this.page);
+      } else {
+        this.getSpuList();
+      }
+    },
+    //删除spu按钮的回调
+    async deleteSpu(row) {
+      let result = await this.$API.spu.reqDeleteSpu(row.id);
+      //2022.10.17删除不成功，怀疑后端接口问题
+      //后端狗出来挨打！！！！！！！！！！！！！！！
+      //后端狗出来挨打！！！！！！！！！！！！！！！
+      //后端狗出来挨打！！！！！！！！！！！！！！！
+      //后端狗出来挨打！！！！！！！！！！！！！！！
+      //后端狗出来挨打！！！！！！！！！！！！！！！
+      //2022.10.18好吧我写错了，后端大哥对不起
+      if (result.code == 200) {
+        this.$message({ type: "success", message: "删除成功" });
+        this.getSpuList(this.records.length > 1 ? this.page : this.page - 1);
+      }
+    },
+    //添加sku按钮的回调
+    addSku(row) {
+      //切换场景为2
+      this.scene = 2;
+      //父组件调用子组件的方法，让子组件发请求---三个请求
+      this.$refs.sku.getData(this.category1Id, this.category2Id, row);
+    },
+    //skuform 通知父组件修改场景
+    changeScene1(scene) {
+      this.scene = scene;
+    },
+    //查看sku按钮的回调
+    async handler(spu) {
+      //点击按钮的时候，对话框可见
+      this.dialogTableVisible = true;
+      //保存spu信息
+      this.spu = spu;
+      ///获取sku列表的数据进行展示
+      let result = await this.$API.spu.reqSkuList(spu.id);
+      if (result.code == 200) {
+        this.skuList = result.data;
+        this.loading = false;
+      }
+    },
+
+    //关闭对话框的回调
+    close(done) {
+      //loading属性再次变为真
+      this.loading = true;
+      //清除sku列表的数据
+      this.skuList = [];
+      //管理对话框
+      done();
     },
   },
 };
