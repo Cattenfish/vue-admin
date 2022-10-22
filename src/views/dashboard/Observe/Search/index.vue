@@ -8,11 +8,10 @@
             <i class="el-icon-more"></i>
           </span>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>黄金糕</el-dropdown-item>
-            <el-dropdown-item>狮子头</el-dropdown-item>
-            <el-dropdown-item>螺蛳粉</el-dropdown-item>
-            <el-dropdown-item>双皮奶</el-dropdown-item>
-            <el-dropdown-item>蚵仔煎</el-dropdown-item>
+            <el-dropdown-item>百度</el-dropdown-item>
+            <el-dropdown-item>淘宝</el-dropdown-item>
+            <el-dropdown-item>微博</el-dropdown-item>
+            <el-dropdown-item>小红书</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -20,39 +19,45 @@
     <div>
       <el-row :gutter="10">
         <el-col :span="12"><LineCharts></LineCharts></el-col>
-        <el-col :span="12"><LineCharts></LineCharts></el-col>
+        <el-col :span="12"><PersonLineCharts></PersonLineCharts></el-col>
       </el-row>
       <!-- table表格   :default-sort="{ prop: 'date', order: 'descending' }"  :formatter="formatter"-->
-      <el-table :data="tableData" style="width: 100%" border>
-        <el-table-column prop="" label="排名" width="80" type="index">
-        </el-table-column>
-        <el-table-column prop="" label="搜索关键字" width="180">
-        </el-table-column>
-        <el-table-column prop="" label="用户数" sortable> </el-table-column>
-        <el-table-column prop="" label="周涨幅" sortable> </el-table-column>
-      </el-table>
-      <!-- 分页器 -->
-      <el-pagination
-        layout="prev, pager, next"
-        :total="1000"
-        class="pagination"
+      <el-table
+        class="table"
+        :data="tableData"
+        style="height: 215px"
+        border
+        :row-style="{ height: '52px' }"
       >
-      </el-pagination>
+        <el-table-column label="排名" width="80" type="index">
+        </el-table-column>
+        <el-table-column prop="keyword" label="搜索关键字" width="180">
+        </el-table-column>
+        <el-table-column prop="num" label="用户数" sortable> </el-table-column>
+        <el-table-column prop="rate" label="周涨幅" sortable> </el-table-column>
+      </el-table>
     </div>
   </el-card>
 </template>
 
 <script>
 import LineCharts from "./LineCharts";
+import PersonLineCharts from "./PersonLineCharts";
 export default {
   name: "",
   data() {
     return {
-      tableData: [],
+      tableData: [
+        { keyword: "价格", num: "425", rate: "17%" },
+        { keyword: "实惠", num: "422", rate: "13%" },
+        { keyword: "好看", num: "123", rate: "3%" },
+        { keyword: "便宜", num: "312", rate: "34%" },
+      ],
     };
   },
   components: {
     LineCharts,
+    PersonLineCharts,
   },
 };
 </script>
@@ -66,7 +71,8 @@ export default {
   border-bottom: 1px solid #eee;
   padding: 5px, 0px;
 }
-.pagination {
-  float: right;
+
+.el-dropdown-link {
+  cursor: pointer;
 }
 </style>

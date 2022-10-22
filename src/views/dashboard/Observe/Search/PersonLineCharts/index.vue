@@ -1,14 +1,14 @@
 <template>
   <div>
     <div class="header">
-      <span class="search-header">搜索用户数</span>
+      <span class="search-header">人均搜索次数</span>
       <i class="el-icon-warning-outline"></i>
     </div>
     <div class="main">
-      <span class="main-title">12321</span>
-      <span class="main-content">17.1%</span>
+      <span class="main-title">3.1</span>
+      <span class="main-content">23.6%</span>
 
-      <i class="el-icon-caret-bottom" style="color: red"></i>
+      <i class="el-icon-caret-top" style="color: greenyellow"></i>
     </div>
     <div class="footer">
       <div class="charts" ref="charts"></div>
@@ -35,7 +35,7 @@ export default {
       series: [
         {
           type: "line",
-          data: [34, 10, 7, 33, 23, 56, 43, 35, 88, 9],
+          data: [12, 8, 45, 23, 29, 34, 24, 36, 38, 23],
           smooth: true,
           //拐点样式设置
           itemStyle: {
@@ -43,7 +43,7 @@ export default {
           },
           //线条样式
           lineStyle: {
-            color: "cyan",
+            color: "orange",
           },
           //填充颜色
           areaStyle: {
@@ -57,7 +57,7 @@ export default {
                 //0%的颜色
                 {
                   offset: 0,
-                  color: "cyan",
+                  color: "orange",
                 },
                 //100%的颜色
                 {
